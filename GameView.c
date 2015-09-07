@@ -8,8 +8,10 @@
 // #include "Map.h" ... if you decide to use the Map ADT
      
 struct gameView {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    int hello;
+    PlayerID currentPlayer;
+    Round currentRound;
+    
+    //TO BE COMPLETED
 };
      
 
@@ -18,7 +20,7 @@ GameView newGameView(char *pastPlays, PlayerMessage messages[])
 {
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
     GameView gameView = malloc(sizeof(struct gameView));
-    gameView->hello = 42;
+
     return gameView;
 }
      
@@ -36,15 +38,13 @@ void disposeGameView(GameView toBeDeleted)
 // Get the current round
 Round getRound(GameView currentView)
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return 0;
+    return(currentView->currentRound);
 }
 
 // Get the id of current player - ie whose turn is it?
 PlayerID getCurrentPlayer(GameView currentView)
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return 0;
+    return(currentView->currentPlayer);
 }
 
 // Get the current score
