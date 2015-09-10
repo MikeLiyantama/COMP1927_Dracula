@@ -6,21 +6,43 @@
 #include "Game.h"
 #include "GameView.h"
 // #include "Map.h" ... if you decide to use the Map ADT
-     
+
+#define	EMPTY_LOCATION		0
+
+//Players' Status
+typedef struct _player {
+	int currentHealth;
+	LocationID currentLocation;
+
+	//TO BE COMPLETED
+}Player;
+
 struct gameView {
     PlayerID currentPlayer;
     Round currentRound;
-    
-    //TO BE COMPLETED
+	int currentScore;
+	Player LG; //Lord Godalming
+	Player DS; //Dr. Seward
+	Player VH; //Van Helsing
+	Player MH; //Mina Harker
+	Player DC; //Dracula
+
+	//TO BE COMPLETED
 };
-     
+
+
 
 // Creates a new GameView to summarise the current state of the game
-GameView newGameView(char *pastPlays, PlayerMessage messages[])
-{
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+GameView newGameView(char *pastPlays, PlayerMessage messages[]){
     GameView gameView = malloc(sizeof(struct gameView));
 
+	// Initialize
+	gameView->currentRound = 0;
+	gameView->LG->currentHealth = gameView->DS->currentHealth = gameView->VH->currentHealth = gameView->MH->currentHealth = GAME_START_HUNTER_LIFE_POINTS;
+	gameView->DC->currentHealth = GAME_START_BLOOD_POINTS;
+	gameView->currentScore = GAME_START_SCORE;
+	gameView->currentPlayer = PLAYER_LORD_GODALMING;
+	gameView->LG->currentLocation = gameView->DC->currentLocation = gameView->VH->currentLocation = gameView->MH->currentLocation = gameView->DC->currentLocation = UNKNOWN_LOCATION;
     return gameView;
 }
      
@@ -50,22 +72,61 @@ PlayerID getCurrentPlayer(GameView currentView)
 // Get the current score
 int getScore(GameView currentView)
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return 0;
+	return (gameView->currentScore);
 }
 
 // Get the current health points for a given player
 int getHealth(GameView currentView, PlayerID player)
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return 0;
+	int health = 0;
+	switch (player) {
+	case PLAYER_LORD_GODALMING:
+		health = gameView->LG->currentHealth;
+		break;
+	case PLAYER_DR_SEWARD:
+		health = gameView->DS->currentHealth;
+		break;
+	case PLAYER_VAN_HELSING:
+		health = gameView->VH->currentHealth;
+		break;
+	case PLAYER_MINA_HARKER:
+		health = gameView->LG->currentHealth;
+		break;
+	case PLAYER_DRACULA:
+		health = gameView->LG->currentHealth;
+		break;
+	default:
+		printf("INVALID PLAYER INPUT");
+		abort();
+	}
+	return health;
 }
 
 // Get the current location id of a given player
 LocationID getLocation(GameView currentView, PlayerID player)
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return 0;
+	LocationID location = NULL;
+	switch (player) {
+	case PLAYER_LORD_GODALMING:
+		location = gameView->LG->currentLocation;
+		break;
+	case PLAYER_DR_SEWARD:
+		location = gameView->DS->currentLocation;
+		break;
+	case PLAYER_VAN_HELSING:
+		location = gameView->VH->currentLocation;
+		break;
+	case PLAYER_MINA_HARKER:
+		location = gameView->LG->currentLocation;
+		break;
+	case PLAYER_DRACULA:
+		location = gameView->LG->currentLocation;
+		break;
+	default:
+		printf("INVALID PLAYER INPUT");
+		abort();
+	}
+	return location;
 }
 
 //// Functions that return information about the history of the game
@@ -74,7 +135,7 @@ LocationID getLocation(GameView currentView, PlayerID player)
 void getHistory(GameView currentView, PlayerID player,
                             LocationID trail[TRAIL_SIZE])
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
+    
 }
 
 //// Functions that query the map to find information about connectivity
