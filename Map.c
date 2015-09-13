@@ -91,7 +91,7 @@ void addLink(Map g, LocationID start, LocationID end, TransportID type)
 }
 
 // Display content of Map/Graph
-void showMap(Map g)
+void disposeMap(Map g)
 {
    assert(g != NULL);
    printf("V=%d, E=%d\n", g->nV, g->nE);
