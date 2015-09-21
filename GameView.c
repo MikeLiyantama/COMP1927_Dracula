@@ -30,12 +30,18 @@ struct gameView {
 	//TO BE COMPLETED
 };
 
+//Supplementary functions
+static void processTurn(GameView gameView, char *pastPlays); // Processes each turn for each player (process each 7 chars)
+static void processHunter(GameView gameView, char *pastPlays); // Process Hunter Type Turn
+static void processDracula(GameView gameView, char *pastPlays); // Process Dracula Type Turn
+
 
 
 // Creates a new GameView to summarise the current state of the game
 GameView newGameView(char *pastPlays, PlayerMessage messages[]){
     GameView gameView = malloc(sizeof(struct gameView));
-
+	assert(gameView != NULL);
+	
 	// Initialize
 	gameView->currentRound = 0;
 	gameView->LG->currentHealth = gameView->DS->currentHealth = gameView->VH->currentHealth = gameView->MH->currentHealth = GAME_START_HUNTER_LIFE_POINTS;
@@ -43,14 +49,48 @@ GameView newGameView(char *pastPlays, PlayerMessage messages[]){
 	gameView->currentScore = GAME_START_SCORE;
 	gameView->currentPlayer = PLAYER_LORD_GODALMING;
 	gameView->LG->currentLocation = gameView->DC->currentLocation = gameView->VH->currentLocation = gameView->MH->currentLocation = gameView->DC->currentLocation = UNKNOWN_LOCATION;
-    return gameView;
+    
+	char *playsPointer = &pastPlays[0];
+	if (*pastPointer == NULL) {
+		break;
+	}
+	else {
+		while (*pastPointer != NULL) {
+			gameView->currentRound++;
+			processTurn(gameView, pastPlays);
+		}
+	}
+	return gameView;
 }
      
      
 // Frees all memory previously allocated for the GameView toBeDeleted
 void disposeGameView(GameView toBeDeleted)
 {
-    //COMPLETE THIS IMPLEMENTATION
+    assert(toBeDeleted != NULL);
+
+    free( toBeDeleted->LG->currentHealth );
+    free( toBeDeleted->DS->currentHealth );
+    free( toBeDeleted->VH->currentHealth );
+    free( toBeDeleted->MH->currentHealth );
+    free( toBeDeleted->DC->currentHealth );
+
+    free( toBeDeleted->LG->currentLocation );
+    free( toBeDeleted->DS->currentLocation);
+    free( toBeDeleted->VH->currentLocation );
+    free( toBeDeleted->MH->currentLocation );
+    free( toBeDeleted->DC->currentLocation );
+
+    free( toBeDeleted->currentRound );
+    free( toBeDeleted->currentPlayer );
+    free( toBeDeleted->currrentScore );'
+
+    free( toBeDeleted->LG);
+    free( toBeDeleted->DS);
+    free( toBeDeleted->VH);
+    free( toBeDeleted->MH);
+    free( toBeDeleted->DC);
+
     free( toBeDeleted );
 }
 
@@ -90,10 +130,10 @@ int getHealth(GameView currentView, PlayerID player)
 		health = gameView->VH->currentHealth;
 		break;
 	case PLAYER_MINA_HARKER:
-		health = gameView->LG->currentHealth;
+		health = gameView->MH->currentHealth;
 		break;
 	case PLAYER_DRACULA:
-		health = gameView->LG->currentHealth;
+		health = gameView->DC->currentHealth;
 		break;
 	default:
 		printf("INVALID PLAYER INPUT");
@@ -114,13 +154,13 @@ LocationID getLocation(GameView currentView, PlayerID player)
 		location = gameView->DS->currentLocation;
 		break;
 	case PLAYER_VAN_HELSING:
-		location = gameView->VH->currentLocation;
+		location = gameView->VS->currentLocation;
 		break;
 	case PLAYER_MINA_HARKER:
-		location = gameView->LG->currentLocation;
+		location = gameView->MH->currentLocation;
 		break;
 	case PLAYER_DRACULA:
-		location = gameView->LG->currentLocation;
+		location = gameView->DC->currentLocation;
 		break;
 	default:
 		printf("INVALID PLAYER INPUT");
@@ -149,3 +189,22 @@ LocationID *connectedLocations(GameView currentView, int *numLocations,
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
     return NULL;
 }
+
+/*
+static void processTurn(GameView gameView, char *pastPlays) {
+	if (pastPlays == 'G') {
+		processHunter(gameView, *pastPlays);
+	} else if (pastPlays == 'S') {
+		processHunter(gameView, *pastPlays);
+	} else if (pastPlays == 'H') {
+		processHunter(gameView, *pastPlays);
+	} else if (pastPlays == 'M') {
+		processHunter(gameView, *pastPlays);
+	} else if (pastPlays == 'D') {
+		processDracula(gameView, *pastPlays);
+	} else {
+		printf("INVALID TURN");
+		abort();
+	}
+}
+*/
