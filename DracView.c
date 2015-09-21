@@ -8,18 +8,41 @@
 #include "DracView.h"
 // #include "Map.h" ... if you decide to use the Map ADT
      
+//Players' Status
+typedef struct _player {
+	int currentHealth;
+	LocationID currentLocation;
+
+	//TO BE COMPLETED
+}Player;
+     
 struct dracView {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    int hello;
+    PlayerID currentPlayer;
+    Round currentRound;
+	int currentScore;
+	Player LG; //Lord Godalming
+	Player DS; //Dr. Seward
+	Player VH; //Van Helsing
+	Player MH; //Mina Harker
+	Player DC; //Dracula
 };
      
+
+
 
 // Creates a new DracView to summarise the current state of the game
 DracView newDracView(char *pastPlays, PlayerMessage messages[])
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    DracView dracView = malloc(sizeof(struct dracView));
-    dracView->hello = 42;
+    GameView gameView = malloc(sizeof(struct gameView));
+	assert(gameView != NULL);
+	
+	// Initialize
+	gameView->currentRound = 0;
+	gameView->LG->currentHealth = gameView->DS->currentHealth = gameView->VH->currentHealth = gameView->MH->currentHealth = GAME_START_HUNTER_LIFE_POINTS;
+	gameView->DC->currentHealth = GAME_START_BLOOD_POINTS;
+	gameView->currentScore = GAME_START_SCORE;
+	gameView->currentPlayer = PLAYER_LORD_GODALMING;
+	gameView->LG->currentLocation = gameView->DC->currentLocation = gameView->VH->currentLocation = gameView->MH->currentLocation = gameView->DC->currentLocation = UNKNOWN_LOCATION;
     return dracView;
 }
      
