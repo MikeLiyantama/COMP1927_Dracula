@@ -7,8 +7,6 @@
 #include "GameView.h"
 // #include "Map.h" ... if you decide to use the Map ADT
 
-#define	EMPTY_LOCATION		0
-
 //Players' Status
 typedef struct _player {
 	int currentHealth;
@@ -32,9 +30,13 @@ struct gameView {
 
 //Supplementary functions
 static void processTurn(GameView gameView, char *pastPlays); // Processes each turn for each player (process each 7 chars)
-static void processHunter(GameView gameView, char *pastPlays); // Process Hunter Type Turn
-static void processDracula(GameView gameView, char *pastPlays); // Process Dracula Type Turn
+//static void processHunter(GameView gameView, char *pastPlays); // Process Hunter Type Turn
+//static void processDracula(GameView gameView, char *pastPlays); // Process Dracula Type Turn
 
+
+//Technical functions
+static int arrayLength (char *pastPlays);
+static void copyLocation (char *pastPlays, int counter, char *array)
 
 
 // Creates a new GameView to summarise the current state of the game
@@ -50,16 +52,18 @@ GameView newGameView(char *pastPlays, PlayerMessage messages[]){
 	gameView->currentPlayer = PLAYER_LORD_GODALMING;
 	gameView->LG->currentLocation = gameView->DC->currentLocation = gameView->VH->currentLocation = gameView->MH->currentLocation = gameView->DC->currentLocation = UNKNOWN_LOCATION;
     
-	char *playsPointer = &pastPlays[0];
-	if (*pastPointer == NULL) {
-		break;
-	}
-	else {
-		while (*pastPointer != NULL) {
-			gameView->currentRound++;
+	int playLength = arrayLength (pastPlays);
+	int counter = 0;
+	if(playLength == 0){
+		return gameView;
+	} else {
+		while(playLength[counter] != NULL){
 			processTurn(gameView, pastPlays);
+            counter++;
 		}
 	}
+	
+	
 	return gameView;
 }
      
@@ -112,33 +116,26 @@ PlayerID getCurrentPlayer(GameView currentView)
 // Get the current score
 int getScore(GameView currentView)
 {
-	return (gameView->currentScore);
+	return (currentView->currentScore);
 }
 
 // Get the current health points for a given player
 int getHealth(GameView currentView, PlayerID player)
 {
-	int health = 0;
-	switch (player) {
-	case PLAYER_LORD_GODALMING:
-		health = gameView->LG->currentHealth;
-		break;
-	case PLAYER_DR_SEWARD:
-		health = gameView->DS->currentHealth;
-		break;
-	case PLAYER_VAN_HELSING:
-		health = gameView->VH->currentHealth;
-		break;
-	case PLAYER_MINA_HARKER:
-		health = gameView->MH->currentHealth;
-		break;
-	case PLAYER_DRACULA:
-		health = gameView->DC->currentHealth;
-		break;
-	default:
-		printf("INVALID PLAYER INPUT");
-		abort();
-	}
+	int health;
+    if(player == PLAYER_LORD_GODALMING){
+        health = currentView->LG->currentHealth;
+    } else if (player == PLAYER_DR_SEWARD){
+        health = currentView->DS->currentHealth;
+    } else if (player == PLAYER_VAN_HELSING){
+        health = currentView->VH->currentHealth;
+    } else if (player == PLAYER_MINA_HARKER){
+        health = currentView->MH->currentHealth;
+    } else if (player == PLAYER_DRACULA){
+        health = currentView->DC->currentHealth;
+    } else
+        printf("INVALID PLAYER INPUT");
+        abort();
 	return health;
 }
 
@@ -146,26 +143,21 @@ int getHealth(GameView currentView, PlayerID player)
 LocationID getLocation(GameView currentView, PlayerID player)
 {
 	LocationID location = NULL;
-	switch (player) {
-	case PLAYER_LORD_GODALMING:
-		location = gameView->LG->currentLocation;
-		break;
-	case PLAYER_DR_SEWARD:
-		location = gameView->DS->currentLocation;
-		break;
-	case PLAYER_VAN_HELSING:
-		location = gameView->VS->currentLocation;
-		break;
-	case PLAYER_MINA_HARKER:
-		location = gameView->MH->currentLocation;
-		break;
-	case PLAYER_DRACULA:
-		location = gameView->DC->currentLocation;
-		break;
-	default:
-		printf("INVALID PLAYER INPUT");
-		abort();
-	}
+	int health;
+    if(player == PLAYER_LORD_GODALMING){
+        health = currentView->LG->currentLocation;
+    } else if (player == PLAYER_DR_SEWARD){
+        health = currentView->DS->currentLocation;
+    } else if (player == PLAYER_VAN_HELSING){
+        health = currentView->VH->currentLocation;
+    } else if (player == PLAYER_MINA_HARKER){
+        health = currentView->MH->currentLocation;
+    } else if (player == PLAYER_DRACULA){
+        health = currentView->DC->currentLocation;
+    } else
+        printf("INVALID PLAYER INPUT");
+        abort();
+		
 	return location;
 }
 
@@ -190,21 +182,144 @@ LocationID *connectedLocations(GameView currentView, int *numLocations,
     return NULL;
 }
 
-/*
-static void processTurn(GameView gameView, char *pastPlays) {
-	if (pastPlays == 'G') {
-		processHunter(gameView, *pastPlays);
-	} else if (pastPlays == 'S') {
-		processHunter(gameView, *pastPlays);
-	} else if (pastPlays == 'H') {
-		processHunter(gameView, *pastPlays);
-	} else if (pastPlays == 'M') {
-		processHunter(gameView, *pastPlays);
-	} else if (pastPlays == 'D') {
-		processDracula(gameView, *pastPlays);
-	} else {
-		printf("INVALID TURN");
-		abort();
-	}
+//Supplementary Functions
+
+void processTurn(char *pastPlays, int counter){
+	char tempNewLocation [3];
+    if(pastPlays[counter] == 'G'){
+        counter++; // Advance to Location
+        
+        //Processing Location
+        copyLocation(pastPlays,counter,tempNewLocation);
+        gameView->LG->currentLocation = abbrevToID(tempNewLocation);
+        counter = counter+2; // Advance to Actions
+        
+        //Processing Actions
+        while(counter % 8 != 0){
+            if(pastPlays[counter] == 'T'){
+                gameView->LG->currentHealth = (gameView->LG->currentHealth)-2;
+                counter++;
+            } else if(pastPlays[counter] == 'V'){
+                //VANQUISH IMMATURE VAMPIRE
+                counter++
+            } else if(pastPlays[counter] == 'D'){
+                gameView->LG->currentHealth = (gameView->LG->currentHealth)-4;
+                gameView->DC->currentHealth = (gameView->DC->currentHealth)-10;
+                counter++;
+            } else if(pastPlays[counter] == '.'){
+                counter++;
+            } else{
+                printf("INVALID INPUT");
+                abort();
+            }
+        }
+    }else if(pastPlays[counter] == 'S'){
+        counter++; // Advance to Location
+        
+        //Processing Location
+        copyLocation(pastPlays,counter,tempNewLocation);
+        gameView->DS->currentLocation = abbrevToID(tempNewLocation);
+        counter = counter+2; // Advance to Actions
+        
+        //Processing Actions
+        while(counter % 8 != 0){
+            if(pastPlays[counter] == 'T'){
+                gameView->DS->currentHealth = (gameView->DS->currentHealth)-2;
+                counter++;
+            } else if(pastPlays[counter] == 'V'){
+                //VANQUISH IMMATURE VAMPIRE
+                counter++
+            } else if(pastPlays[counter] == 'D'){
+                gameView->DS->currentHealth = (gameView->DS->currentHealth)-4;
+                gameView->DC->currentHealth = (gameView->DC->currentHealth)-10;
+                counter++;
+            } else if(pastPlays[counter] == '.'){
+                counter++;
+            } else{
+                printf("INVALID INPUT");
+                abort();
+            }
+        }
+    }else if(pastPlays[counter] == 'H'){
+        counter++; // Advance to Location
+        
+        //Processing Location
+        copyLocation(pastPlays,counter,tempNewLocation);
+        gameView->VH->currentLocation = abbrevToID(tempNewLocation);
+        counter = counter+2; // Advance to Actions
+        
+        //Processing Actions
+        while(counter % 8 != 0){
+            if(pastPlays[counter] == 'T'){
+                gameView->VH->currentHealth = (gameView->VH->currentHealth)-2;
+                counter++;
+            } else if(pastPlays[counter] == 'V'){
+                //VANQUISH IMMATURE VAMPIRE
+                counter++
+            } else if(pastPlays[counter] == 'D'){
+                gameView->VH->currentHealth = (gameView->VH->currentHealth)-4;
+                gameView->DC->currentHealth = (gameView->DC->currentHealth)-10;
+                counter++;
+            } else if(pastPlays[counter] == '.'){
+                counter++;
+            } else{
+                printf("INVALID INPUT");
+                abort();
+            }
+        }
+    }else if(pastPlays[counter] == 'M'){
+        counter++; // Advance to Location
+        
+        //Processing Location
+        copyLocation(pastPlays,counter,tempNewLocation);
+        gameView->MH->currentLocation = abbrevToID(tempNewLocation);
+        counter = counter+2; // Advance to Actions
+        
+        //Processing Actions
+        while(counter % 8 != 0){
+            if(pastPlays[counter] == 'T'){
+                gameView->MH->currentHealth = (gameView->MH->currentHealth)-2;
+                counter++;
+            } else if(pastPlays[counter] == 'V'){
+                //VANQUISH IMMATURE VAMPIRE
+                counter++
+            } else if(pastPlays[counter] == 'D'){
+                gameView->MH->currentHealth = (gameView->MH->currentHealth)-4;
+                gameView->DC->currentHealth = (gameView->DC->currentHealth)-10;
+                counter++;
+            } else if(pastPlays[counter] == '.'){
+                counter++;
+            } else{
+                printf("INVALID INPUT");
+                abort();
+            }
+        }
+    }else if(pastPlays[counter] == 'D'){
+        counter++; // Advance to Location
+        
+        //Processing Location
+        copyLocation(pastPlays,counter,tempNewLocation);
+        gameView->DC->currentLocation = abbrevToID(tempNewLocation);
+        counter = counter+2; // Advance to Actions
+        
+        //Processing Actions
+        
+        //TOBECOMPLETED
+    }
 }
-*/
+
+
+int arrayLength (char *pastPlays){
+	int length = 0;
+	while(pastPlays[length] != NULL){
+		counter++;
+	}
+	return counter;
+}
+
+void copyLocation (char *pastPlays, int counter, char *array){
+    int tempCounter = 0;
+    array[tempCounter] = pastPlays[counter];
+    array[tempCounter+1] = pastPlays[counter+1];
+    array[tempCounter+2] = NULL;
+}
