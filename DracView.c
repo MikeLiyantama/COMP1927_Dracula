@@ -2,11 +2,15 @@
 
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 #include "Globals.h"
 #include "Game.h"
-#include "GameView.h"
+#include "dracView.h"
 #include "DracView.h"
 // #include "Map.h" ... if you decide to use the Map ADT
+
+static int arrayLength (char *pastPlays);
+
      
 //Players' Status
 typedef struct _player {
@@ -33,16 +37,35 @@ struct dracView {
 // Creates a new DracView to summarise the current state of the game
 DracView newDracView(char *pastPlays, PlayerMessage messages[])
 {
-    GameView gameView = malloc(sizeof(struct gameView));
-	assert(gameView != NULL);
+    DracView dracView = malloc(sizeof(struct dracView));
+	assert(dracView != NULL);
 	
 	// Initialize
-	gameView->currentRound = 0;
-	gameView->LG->currentHealth = gameView->DS->currentHealth = gameView->VH->currentHealth = gameView->MH->currentHealth = GAME_START_HUNTER_LIFE_POINTS;
-	gameView->DC->currentHealth = GAME_START_BLOOD_POINTS;
-	gameView->currentScore = GAME_START_SCORE;
-	gameView->currentPlayer = PLAYER_LORD_GODALMING;
-	gameView->LG->currentLocation = gameView->DC->currentLocation = gameView->VH->currentLocation = gameView->MH->currentLocation = gameView->DC->currentLocation = UNKNOWN_LOCATION;
+	dracView->currentRound = 0;
+	dracView->LG->currentHealth = dracView->DS->currentHealth
+                = dracView->VH->currentHealth 
+                = dracView->MH->currentHealth 
+                = GAME_START_HUNTER_LIFE_POINTS;
+	dracView->DC->currentHealth = GAME_START_BLOOD_POINTS;
+	dracView->currentScore = GAME_START_SCORE;
+	dracView->currentPlayer = PLAYER_LORD_GODALMING;
+	dracView->LG->currentLocation = dracView->DC->currentLocation 
+                = dracView->VH->currentLocation
+                = dracView->MH->currentLocation 
+                = dracView->DC->currentLocation 
+                = UNKNOWN_LOCATION;
+    int playsLength = arrayLength(pastPlays);
+
+    if(pastPlays = NULL)
+        return dracView;
+    int counter = 0;
+    for(counter = 0; counter < playsLength ; counter++){
+        if(pastPlays[counter] == 'G'){
+            counter++;
+            pastPlays[counter] == 2;
+            pastPlays == 2
+            
+    }
     return dracView;
 }
      
@@ -50,7 +73,30 @@ DracView newDracView(char *pastPlays, PlayerMessage messages[])
 // Frees all memory previously allocated for the DracView toBeDeleted
 void disposeDracView(DracView toBeDeleted)
 {
-    //COMPLETE THIS IMPLEMENTATION
+    assert(toBeDeleted != NULL);
+
+    free( toBeDeleted->LG->currentHealth );
+    free( toBeDeleted->DS->currentHealth );
+    free( toBeDeleted->VH->currentHealth );
+    free( toBeDeleted->MH->currentHealth );
+    free( toBeDeleted->DC->currentHealth );
+
+    free( toBeDeleted->LG->currentLocation );
+    free( toBeDeleted->DS->currentLocation);
+    free( toBeDeleted->VH->currentLocation );
+    free( toBeDeleted->MH->currentLocation );
+    free( toBeDeleted->DC->currentLocation );
+
+    free( toBeDeleted->currentRound );
+    free( toBeDeleted->currentPlayer );
+    free( toBeDeleted->currrentScore );
+
+    free( toBeDeleted->LG);
+    free( toBeDeleted->DS);
+    free( toBeDeleted->VH);
+    free( toBeDeleted->MH);
+    free( toBeDeleted->DC);
+
     free( toBeDeleted );
 }
 
@@ -61,21 +107,42 @@ void disposeDracView(DracView toBeDeleted)
 Round giveMeTheRound(DracView currentView)
 {
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return 0;
+    return(currentView->currentRound);
 }
 
 // Get the current score
 int giveMeTheScore(DracView currentView)
 {
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return 0;
+    return (currentView->currentScore);
 }
 
 // Get the current health points for a given player
 int howHealthyIs(DracView currentView, PlayerID player)
 {
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return 0;
+    int health = 0;
+    switch (player) {
+    case PLAYER_LORD_GODALMING:
+        health = currentView->LG->currentHealth;
+        break;
+    case PLAYER_DR_SEWARD:
+        health = currentView->DS->currentHealth;
+        break;
+    case PLAYER_VAN_HELSING:
+        health = currentView->VH->currentHealth;
+        break;
+    case PLAYER_MINA_HARKER:
+        health = currentView->MH->currentHealth;
+        break;
+    case PLAYER_DRACULA:
+        health = currentView->DC->currentHealth;
+        break;
+    default:
+        printf("INVALID PLAYER INPUT");
+        abort();
+    }
+    return health;
 }
 
 // Get the current location id of a given player
@@ -125,4 +192,11 @@ LocationID *whereCanTheyGo(DracView currentView, int *numLocations,
 {
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
     return NULL;
+}
+
+
+Player playerstat(Player player, int health, LocationID location){
+    player->health = health;
+    player->location = location;
+    return player;
 }
