@@ -7,6 +7,9 @@
 #include "GameView.h"
 // #include "Map.h" ... if you decide to use the Map ADT
 
+//Pointers Misc
+typedef struct _player *playerLink //Pointer to Player
+
 //Players' Status
 typedef struct _player {
 	int currentHealth;
@@ -29,7 +32,7 @@ struct gameView {
 };
 
 //Supplementary functions
-static void processTurn(GameView gameView, char *pastPlays); // Processes each turn for each player (process each 7 chars)
+static void processTurn(char *pastPlays, int counter, GameView gameView); // Processes each turn for each player (process each 7 chars)
 //static void processHunter(GameView gameView, char *pastPlays); // Process Hunter Type Turn
 //static void processDracula(GameView gameView, char *pastPlays); // Process Dracula Type Turn
 
@@ -37,6 +40,7 @@ static void processTurn(GameView gameView, char *pastPlays); // Processes each t
 //Technical functions
 static int arrayLength (char *pastPlays);
 static void copyLocation (char *pastPlays, int counter, char *array)
+static playerLink playerSelector (PlayerID currentPlayer, gameView g);
 
 
 // Creates a new GameView to summarise the current state of the game
@@ -58,11 +62,10 @@ GameView newGameView(char *pastPlays, PlayerMessage messages[]){
 		return gameView;
 	} else {
 		while(playLength[counter] != NULL){
-			processTurn(gameView, pastPlays);
+			processTurn(pastPlays,counter,gameView);
             counter++;
 		}
 	}
-	
 	
 	return gameView;
 }
@@ -122,43 +125,13 @@ int getScore(GameView currentView)
 // Get the current health points for a given player
 int getHealth(GameView currentView, PlayerID player)
 {
-	int health;
-    if(player == PLAYER_LORD_GODALMING){
-        health = currentView->LG->currentHealth;
-    } else if (player == PLAYER_DR_SEWARD){
-        health = currentView->DS->currentHealth;
-    } else if (player == PLAYER_VAN_HELSING){
-        health = currentView->VH->currentHealth;
-    } else if (player == PLAYER_MINA_HARKER){
-        health = currentView->MH->currentHealth;
-    } else if (player == PLAYER_DRACULA){
-        health = currentView->DC->currentHealth;
-    } else
-        printf("INVALID PLAYER INPUT");
-        abort();
-	return health;
+	return ((playerSelector(player,currentView))->currentHealth);
 }
 
 // Get the current location id of a given player
 LocationID getLocation(GameView currentView, PlayerID player)
 {
-	LocationID location = NULL;
-	int health;
-    if(player == PLAYER_LORD_GODALMING){
-        health = currentView->LG->currentLocation;
-    } else if (player == PLAYER_DR_SEWARD){
-        health = currentView->DS->currentLocation;
-    } else if (player == PLAYER_VAN_HELSING){
-        health = currentView->VH->currentLocation;
-    } else if (player == PLAYER_MINA_HARKER){
-        health = currentView->MH->currentLocation;
-    } else if (player == PLAYER_DRACULA){
-        health = currentView->DC->currentLocation;
-    } else
-        printf("INVALID PLAYER INPUT");
-        abort();
-		
-	return location;
+	return ((playerSelector(player,currentView))->currentLocation);
 }
 
 //// Functions that return information about the history of the game
@@ -184,7 +157,7 @@ LocationID *connectedLocations(GameView currentView, int *numLocations,
 
 //Supplementary Functions
 
-void processTurn(char *pastPlays, int counter){
+void processTurn(char *pastPlays, int counter, GameView gameView){
 	char tempNewLocation [3];
     if(pastPlays[counter] == 'G'){
         counter++; // Advance to Location
@@ -312,9 +285,9 @@ void processTurn(char *pastPlays, int counter){
 int arrayLength (char *pastPlays){
 	int length = 0;
 	while(pastPlays[length] != NULL){
-		counter++;
+		length;
 	}
-	return counter;
+	return length;
 }
 
 void copyLocation (char *pastPlays, int counter, char *array){
@@ -322,4 +295,21 @@ void copyLocation (char *pastPlays, int counter, char *array){
     array[tempCounter] = pastPlays[counter];
     array[tempCounter+1] = pastPlays[counter+1];
     array[tempCounter+2] = NULL;
+}
+
+playerLink playerSelector (PlayerID Player, gameView g){
+    player *temp = malloc(sizeof(struct _player));
+    if(Player == 0){
+        temp = gameView->LG;
+    }else if(currentPlayer == 1){
+        temp = gameView->DS;
+    }else if(currentPlayer == 2){
+        temp = gameView->VH;
+    }else if(currentPlayer == 3){
+        temp = gameView->MH;
+    }else if(currentPlayer == 4){
+        temp = gameView->DC;
+    }
+    
+    return temp;
 }

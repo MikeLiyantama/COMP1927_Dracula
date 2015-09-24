@@ -8,6 +8,10 @@
 #include "HunterView.h"
 // #include "Map.h" ... if you decide to use the Map ADT
      
+//Pointers Misc
+typedef struct _player *playerLink //Pointer to Player
+     
+     
 //Players' Status
 typedef struct _player {
 	int currentHealth;
@@ -27,6 +31,8 @@ struct hunterView {
 	Player DC; //Dracula
 };
      
+
+static playerLink playerSelector (PlayerID currentPlayer, gameView g);
 
 // Creates a new HunterView to summarise the current state of the game
 HunterView newHunterView(char *pastPlays, PlayerMessage messages[])
@@ -100,44 +106,13 @@ int giveMeTheScore(HunterView currentView)
 // Get the current health points for a given player
 int howHealthyIs(HunterView currentView, PlayerID player)
 {
-    int health;
-    if(player == PLAYER_LORD_GODALMING){
-        health = currentView->LG->currentHealth;
-    } else if (player == PLAYER_DR_SEWARD){
-        health = currentView->DS->currentHealth;
-    } else if (player == PLAYER_VAN_HELSING){
-        health = currentView->VH->currentHealth;
-    } else if (player == PLAYER_MINA_HARKER){
-        health = currentView->MH->currentHealth;
-    } else if (player == PLAYER_DRACULA){
-        health = currentView->DC->currentHealth;
-    } else
-        printf("INVALID PLAYER INPUT");
-        abort();
-    
-    return health;
+    return ((playerSelector(player,currentView))->currentHealth);
 }
 
 // Get the current location id of a given player
 LocationID whereIs(HunterView currentView, PlayerID player)
-{
-    LocationID location = NULL;
-	int health;
-    if(player == PLAYER_LORD_GODALMING){
-        health = currentView->LG->currentLocation;
-    } else if (player == PLAYER_DR_SEWARD){
-        health = currentView->DS->currentLocation;
-    } else if (player == PLAYER_VAN_HELSING){
-        health = currentView->VH->currentLocation;
-    } else if (player == PLAYER_MINA_HARKER){
-        health = currentView->MH->currentLocation;
-    } else if (player == PLAYER_DRACULA){
-        health = currentView->DC->currentLocation;
-    } else
-        printf("INVALID PLAYER INPUT");
-        abort();
-    
-    return location;
+{   
+    return ((playerSelector(player,currentView))->currentLocation);
 }
 
 //// Functions that return information about the history of the game
@@ -164,4 +139,23 @@ LocationID *whereCanTheyGo(HunterView currentView, int *numLocations,
 {
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
     return NULL;
+}
+
+
+//Suplementary Functions
+playerLink playerSelector (PlayerID Player, gameView g){
+    player *temp = malloc(sizeof(struct _player));
+    if(Player == 0){
+        temp = gameView->LG;
+    }else if(currentPlayer == 1){
+        temp = gameView->DS;
+    }else if(currentPlayer == 2){
+        temp = gameView->VH;
+    }else if(currentPlayer == 3){
+        temp = gameView->MH;
+    }else if(currentPlayer == 4){
+        temp = gameView->DC;
+    }
+    
+    return temp;
 }
