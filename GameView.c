@@ -36,8 +36,12 @@ static void processTurn(char *pastPlays, int counter, GameView gameView); // Pro
 static void processHunter (char *pastPlays, int counter, GameView gameView); // Process Hunter Type Turn
 static void processDracula (char *pastPlays, int counter, GameView gameView); // Process Dracula Type Turn
 
+//Hunter specific functions
+static void hunterEncounter(LocationID hunter, LocationID dracula, int currentScore);
+
 //Dracula Specific Functions
 static void processDoubleBack(char *arrayLocation, LocationID currentLocation); 
+static void draculaEncounter(LocationID dracula, LocationID hunter1, LocationID hunter2 ,LocationID hunter3 ,LocationID hunter4, int currentScore);
 
 //Technical functions
 static int arrayLength (char *pastPlays);
@@ -182,7 +186,7 @@ void copyLocation (char *pastPlays, int counter, char *array){
     array[tempCounter+2] = NULL;
 }
 
-playerLink playerSelector (PlayerID Player, gameView g){
+playerLink playerSelector (PlayerID Player, GameView g){
     playerLink *temp = malloc(sizeof(struct _player));
     if(Player == 0){
         temp = gameView->LG;
@@ -230,6 +234,8 @@ void processHunter (char *pastPlays, int counter, GameView gameView){
             abort();
         }
     }
+    
+     
 }
 
 void processDracula (char *pastPlays, int counter, GameView gameView){
@@ -254,16 +260,24 @@ void processDracula (char *pastPlays, int counter, GameView gameView){
     }else{
         gameView->DC->currentLocation = abbrevToID(tempNewLocation);
     }
+    
+    
+    
     counter = counter+2; // Advance to Actions
     
     //Processing Actions;
     
     
     //TO BE COMPLETED
+    
+    //Score modifier
+    draculaEncounter(gameView->DC->currentLocation, gameView->LG->currentLocation, gameView->DS->currentLocation, gameView->VH->currentLocation,gameView->MH->currentLocation,gameView->currentScore);
+    checkSea
+    gameView->currentScore = (gameView->currentScore)-SCORE_LOSS_DRACULA_TURN; 
 }
 
 PlayerID currentTurnSelector(char *pastPlays, int counter){
-    PlayerID player = NULL;
+    PlayerID player;
     if(pastPlays[counter] == 'G'){
         player = PLAYER_LORD_GODALMING;
     }else if(pastPlays[counter] == 'S'){
@@ -282,3 +296,9 @@ void static void processDoubleBack(char *arrayLocation, LocationID currentLocati
     int turn = arrayLocation[1] - '0';
     //Read X turn before current turn, assign current location to that X turn location
 } 
+
+static void draculaEncounter(LocationID dracula, LocationID hunter1, LocationID hunter2 ,LocationID hunter3 ,LocationID hunter4, int currentScore){
+    if(dracula == hunter1 || dracula == hunter2 || dracula == hunter3 || dracula == hunter4){
+        currentScore = currentScore - LIFE_LOSS_HUNTER_ENCOUNTER;
+    }
+}
