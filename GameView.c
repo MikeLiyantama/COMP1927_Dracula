@@ -16,9 +16,21 @@ typedef struct _player *playerLink //Pointer to Player
 typedef struct _player {
 	int currentHealth;
 	LocationID currentLocation;
-
+    List historyList;
 	//TO BE COMPLETED
 }Player;
+
+//Players location storing
+typedef struct _history *Link
+
+typedef struct _history {
+    LocationID location
+    Link next;
+}History
+
+typedef struct _list{
+    Link head;
+}List
 
 struct gameView {
     PlayerID currentPlayer;
@@ -150,6 +162,8 @@ LocationID getLocation(GameView currentView, PlayerID player)
 void getHistory(GameView currentView, PlayerID player,
                             LocationID trail[TRAIL_SIZE])
 {
+    int trailCounter = 0;
+    
     
 }
 
@@ -211,10 +225,10 @@ playerLink playerSelector (PlayerID Player, GameView g){
 void processHunter (char *pastPlays, int counter, GameView gameView){
     char tempNewLocation [3];
     int rest = FALSE;
-        
+    int turnCounter = counter+6;    
     //Determining Player to be Processed
     gameView->currentPlayer = currentTurnSelector(char *pastPlays, int counter)
-    playerLink player = (playerSelector(gameView->currentPlayer,gameView)); //Pointer to current Player.
+    playerLink player = (playerSelector(gameView->currentPlayer,gameView)); //Pointer to current Player ADT.
     counter++; // Advance to Location
         
     //Processing Location
@@ -226,7 +240,7 @@ void processHunter (char *pastPlays, int counter, GameView gameView){
     counter = counter+2; // Advance to Actions
         
     //Processing Actions
-    while(counter % 8 != 0){
+    while(counter < turnCounter){
         if(pastPlays[counter] == 'T'){
             player->currentHealth = (gameView->LG->currentHealth)-2;
             counter++;
