@@ -30,8 +30,18 @@ struct hunterView {
 	Player DC; //Dracula
 };
      
+//Supplementary functions
+static void processTurn(char *pastPlays, int counter, GameView gameView); // Processes each turn for each player (process each 7 chars)
+static void processHunter (char *pastPlays, int counter, GameView gameView); // Process Hunter Type Turn
+static void processDracula (char *pastPlays, int counter, GameView gameView); // Process Dracula Type Turn
 
-static playerLink playerSelector (PlayerID currentPlayer, GameView g);
+//Dracula Specific Functions
+static void processDoubleBack(char *arrayLocation, LocationID currentLocation); 
+
+//Technical functions
+static int arrayLength (char *pastPlays);
+static void copyLocation (char *pastPlays, int counter, char *array)
+static playerLink playerSelector (PlayerID currentPlayer, gameView g);
 
 // Creates a new HunterView to summarise the current state of the game
 HunterView newHunterView(char *pastPlays, PlayerMessage messages[])
@@ -58,11 +68,7 @@ HunterView newHunterView(char *pastPlays, PlayerMessage messages[])
 		}
     }
 	return hunterView;
-}
-    
-    return hunterView;
-}
-     
+}    
      
 // Frees all memory previously allocated for the HunterView toBeDeleted
 void disposeHunterView(HunterView toBeDeleted){
@@ -171,7 +177,9 @@ playerLink playerSelector (PlayerID Player, GameView hunterView){
     return temp;
 }
 
-//Supplementary Functions
+///////////////////////////
+//Supplementary Functions//
+///////////////////////////
 
 void processTurn(char *pastPlays, int counter, GameView hunterView){
 	if(pastPlays[counter] != 'D'){

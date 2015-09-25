@@ -7,6 +7,8 @@
 #include "GameView.h"
 // #include "Map.h" ... if you decide to use the Map ADT
 
+#define HUNTER_MAX_HEALTH       9
+
 //Pointers Misc
 typedef struct _player *playerLink //Pointer to Player
 
@@ -37,16 +39,19 @@ static void processHunter (char *pastPlays, int counter, GameView gameView); // 
 static void processDracula (char *pastPlays, int counter, GameView gameView); // Process Dracula Type Turn
 
 //Hunter specific functions
-static void hunterEncounter(LocationID hunter, LocationID dracula, int currentHealth);
+static void hunterEncounter(LocationID hunter, LocationID dracula, int currentHealth); //Score modifier for dracula encounter
+static void hunterRest(int currentHealth, int bool); //Score modifier for resting
+static void maxHealth(int currentHealth); //Limit maximum health of Hunter
 
 //Dracula Specific Functions
-static void processDoubleBack(char *arrayLocation, LocationID currentLocation); 
-static void draculaEncounter(LocationID dracula, LocationID hunter1, LocationID hunter2 ,LocationID hunter3 ,LocationID hunter4, int currentHealth);
-static void checkSea(LocationID location, int currentHealth);
+static void processDoubleBack(char *arrayLocation, LocationID currentLocation); //Processing doubleback turn
+static void draculaEncounter(LocationID dracula, LocationID hunter1, LocationID hunter2 ,LocationID hunter3 ,LocationID hunter4, int currentHealth); //Score Modifier for hunter encounter
+static void checkSea(LocationID location, int currentHealth); //Score modifier for SEA move
+
 //Technical functions
-static int arrayLength (char *pastPlays);
-static void copyLocation (char *pastPlays, int counter, char *array);
-static playerLink playerSelector (PlayerID currentPlayer, gameView g);
+static int arrayLength (char *pastPlays); //Same as strlen in string.h
+static void copyLocation (char *pastPlays, int counter, char *array); // Same as strcpy in string.h
+static playerLink playerSelector (PlayerID currentPlayer, gameView g); // Pointer to Player
 
 
 // Creates a new GameView to summarise the current state of the game
@@ -205,6 +210,7 @@ playerLink playerSelector (PlayerID Player, GameView g){
 
 void processHunter (char *pastPlays, int counter, GameView gameView){
     char tempNewLocation [3];
+    int rest = FALSE;
         
     //Determining Player to be Processed
     gameView->currentPlayer = currentTurnSelector(char *pastPlays, int counter)
@@ -213,7 +219,9 @@ void processHunter (char *pastPlays, int counter, GameView gameView){
         
     //Processing Location
     copyLocation(pastPlays,counter,tempNewLocation);
-    
+    if(currentLocation == tempNewLocation){
+        rest = TRUE;
+    }
     player->currentLocation = abbrevToID(tempNewLocation);
     counter = counter+2; // Advance to Actions
         
@@ -237,6 +245,7 @@ void processHunter (char *pastPlays, int counter, GameView gameView){
         }
     }
     
+    hunterRest(player->currentHealth, rest);
     hunterEncounter(player->currentLocation, gameView->DC->currentLocation, player->currentHealth);
 }
 
@@ -262,9 +271,6 @@ void processDracula (char *pastPlays, int counter, GameView gameView){
     }else{
         gameView->DC->currentLocation = abbrevToID(tempNewLocation);
     }
-    
-    
-    
     counter = counter+2; // Advance to Actions
     
     //Processing Actions;
@@ -299,6 +305,18 @@ PlayerID currentTurnSelector(char *pastPlays, int counter){
 void hunterEncounter(LocationID hunter, LocationID dracula, int currentScore){
     if(hunter == dracula){
         currentScore = currentScore - LIFE_LOSS_DRACULA_ENCOUNTER;
+    }
+}
+void hunterRest(int currentHealth, int bool){
+    if(bool == TRUE){
+        currentHealth = currentHealth + LIFE_GAIN_REST;
+        maxHealth(currentHealth)
+    }
+}
+
+void maxHealth(int currentHealth){
+    if(currentHealth > 9){
+        currentHealth = HUNTER_MAX_HEALTH;
     }
 }
 
