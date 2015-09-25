@@ -49,7 +49,6 @@ static void processHunter (char *pastPlays, int counter, GameView gameView); // 
 static void processDracula (char *pastPlays, int counter, GameView gameView); // Process Dracula Type Turn
 
 //Hunter specific functions
-static void hunterEncounter(LocationID hunter, LocationID dracula, int currentHealth); //Score modifier for dracula encounter
 static void hunterRest(int currentHealth, int bool); //Score modifier for resting
 static void maxHealth(int currentHealth); //Limit maximum health of Hunter
 
@@ -177,9 +176,9 @@ LocationID *connectedLocations(GameView currentView, int *numLocations,
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
     return NULL;
 }
-
-//Supplementary Functions
-
+///////////////////////////
+//Supplementary Functions//
+///////////////////////////
 void processTurn(char *pastPlays, int counter, GameView gameView){
 	if(pastPlays[counter] != 'D'){
         processHunter (pastPlays,counter,gameView);
@@ -241,14 +240,15 @@ void processHunter (char *pastPlays, int counter, GameView gameView){
     //Processing Actions
     while(counter < turnCounter){
         if(pastPlays[counter] == 'T'){
-            player->currentHealth = (gameView->LG->currentHealth)-2;
+            player->currentHealth = (player->currentHealth)-2;
+            void hunterHospital(int currentHealth, LocationID currentLocation);
             counter++;
         } else if(pastPlays[counter] == 'V'){
             //VANQUISH IMMATURE VAMPIRE
             counter++
         } else if(pastPlays[counter] == 'D'){
-            player->currentHealth = (gameView->LG->currentHealth)-4;
-            player->currentHealth = (gameView->DC->currentHealth)-10;
+            player->currentHealth = (player->currentHealth)-LIFE_LOSS_DRACULA_ENCOUNTER;
+            gameView->DC->currentHealth = (gameView->DC->currentHealth)-LIFE_LOSS_HUNTER_ENCOUNTER ;
             counter++;
         } else if(pastPlays[counter] == '.'){
             counter++;
@@ -257,9 +257,7 @@ void processHunter (char *pastPlays, int counter, GameView gameView){
             abort();
         }
     }
-    
     hunterRest(player->currentHealth, rest);
-    hunterEncounter(player->currentLocation, gameView->DC->currentLocation, player->currentHealth);
 }
 
 void processDracula (char *pastPlays, int counter, GameView gameView){
@@ -308,8 +306,6 @@ void processDracula (char *pastPlays, int counter, GameView gameView){
     }
     counter++
     
-    //TO BE COMPLETED
-    
     //Score modifiers
     draculaEncounter(gameView->DC->currentLocation, gameView->LG->currentLocation, gameView->DS->currentLocation, gameView->VH->currentLocation,gameView->MH->currentLocation,gameView->currentScore);
     checkSea(gameView->DC->currentLocation, gameView->DC->currentHealth);
@@ -334,11 +330,6 @@ PlayerID currentTurnSelector(char *pastPlays, int counter){
     return player;
 }
 
-void hunterEncounter(LocationID hunter, LocationID dracula, int currentScore){
-    if(hunter == dracula){
-        currentScore = currentScore - LIFE_LOSS_DRACULA_ENCOUNTER;
-    }
-}
 void hunterRest(int currentHealth, int bool){
     if(bool == TRUE){
         currentHealth = currentHealth + LIFE_GAIN_REST;
@@ -349,6 +340,13 @@ void hunterRest(int currentHealth, int bool){
 void maxHealth(int currentHealth){
     if(currentHealth > 9){
         currentHealth = HUNTER_MAX_HEALTH;
+    }
+}
+
+void hunterHospital(int currentHealth, LocationID currentLocation){ //Teleport to Hospital if Hunter's health below 0
+    if(currentHealth < 0){
+        currentLocation = ST_JOSEPH_AND_ST_MARYS;
+        currentHealth = 0;
     }
 }
 
