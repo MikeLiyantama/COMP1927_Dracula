@@ -33,9 +33,11 @@ struct gameView {
 
 //Supplementary functions
 static void processTurn(char *pastPlays, int counter, GameView gameView); // Processes each turn for each player (process each 7 chars)
-//static void processHunter(GameView gameView, char *pastPlays); // Process Hunter Type Turn
-//static void processDracula(GameView gameView, char *pastPlays); // Process Dracula Type Turn
+static void processHunter (char *pastPlays, int counter, GameView gameView); // Process Hunter Type Turn
+static void processDracula (char *pastPlays, int counter, GameView gameView); // Process Dracula Type Turn
 
+//Dracula Specific Functions
+static void processDoubleBack(char *arrayLocation, LocationID currentLocation); 
 
 //Technical functions
 static int arrayLength (char *pastPlays);
@@ -65,8 +67,7 @@ GameView newGameView(char *pastPlays, PlayerMessage messages[]){
 			processTurn(pastPlays,counter,gameView);
             counter++;
 		}
-	}
-	
+    }
 	return gameView;
 }
      
@@ -158,126 +159,10 @@ LocationID *connectedLocations(GameView currentView, int *numLocations,
 //Supplementary Functions
 
 void processTurn(char *pastPlays, int counter, GameView gameView){
-	char tempNewLocation [3];
-    if(pastPlays[counter] == 'G'){
-        counter++; // Advance to Location
-        
-        //Processing Location
-        copyLocation(pastPlays,counter,tempNewLocation);
-        gameView->LG->currentLocation = abbrevToID(tempNewLocation);
-        counter = counter+2; // Advance to Actions
-        
-        //Processing Actions
-        while(counter % 8 != 0){
-            if(pastPlays[counter] == 'T'){
-                gameView->LG->currentHealth = (gameView->LG->currentHealth)-2;
-                counter++;
-            } else if(pastPlays[counter] == 'V'){
-                //VANQUISH IMMATURE VAMPIRE
-                counter++
-            } else if(pastPlays[counter] == 'D'){
-                gameView->LG->currentHealth = (gameView->LG->currentHealth)-4;
-                gameView->DC->currentHealth = (gameView->DC->currentHealth)-10;
-                counter++;
-            } else if(pastPlays[counter] == '.'){
-                counter++;
-            } else{
-                printf("INVALID INPUT");
-                abort();
-            }
-        }
-    }else if(pastPlays[counter] == 'S'){
-        counter++; // Advance to Location
-        
-        //Processing Location
-        copyLocation(pastPlays,counter,tempNewLocation);
-        gameView->DS->currentLocation = abbrevToID(tempNewLocation);
-        counter = counter+2; // Advance to Actions
-        
-        //Processing Actions
-        while(counter % 8 != 0){
-            if(pastPlays[counter] == 'T'){
-                gameView->DS->currentHealth = (gameView->DS->currentHealth)-2;
-                counter++;
-            } else if(pastPlays[counter] == 'V'){
-                //VANQUISH IMMATURE VAMPIRE
-                counter++
-            } else if(pastPlays[counter] == 'D'){
-                gameView->DS->currentHealth = (gameView->DS->currentHealth)-4;
-                gameView->DC->currentHealth = (gameView->DC->currentHealth)-10;
-                counter++;
-            } else if(pastPlays[counter] == '.'){
-                counter++;
-            } else{
-                printf("INVALID INPUT");
-                abort();
-            }
-        }
-    }else if(pastPlays[counter] == 'H'){
-        counter++; // Advance to Location
-        
-        //Processing Location
-        copyLocation(pastPlays,counter,tempNewLocation);
-        gameView->VH->currentLocation = abbrevToID(tempNewLocation);
-        counter = counter+2; // Advance to Actions
-        
-        //Processing Actions
-        while(counter % 8 != 0){
-            if(pastPlays[counter] == 'T'){
-                gameView->VH->currentHealth = (gameView->VH->currentHealth)-2;
-                counter++;
-            } else if(pastPlays[counter] == 'V'){
-                //VANQUISH IMMATURE VAMPIRE
-                counter++
-            } else if(pastPlays[counter] == 'D'){
-                gameView->VH->currentHealth = (gameView->VH->currentHealth)-4;
-                gameView->DC->currentHealth = (gameView->DC->currentHealth)-10;
-                counter++;
-            } else if(pastPlays[counter] == '.'){
-                counter++;
-            } else{
-                printf("INVALID INPUT");
-                abort();
-            }
-        }
-    }else if(pastPlays[counter] == 'M'){
-        counter++; // Advance to Location
-        
-        //Processing Location
-        copyLocation(pastPlays,counter,tempNewLocation);
-        gameView->MH->currentLocation = abbrevToID(tempNewLocation);
-        counter = counter+2; // Advance to Actions
-        
-        //Processing Actions
-        while(counter % 8 != 0){
-            if(pastPlays[counter] == 'T'){
-                gameView->MH->currentHealth = (gameView->MH->currentHealth)-2;
-                counter++;
-            } else if(pastPlays[counter] == 'V'){
-                //VANQUISH IMMATURE VAMPIRE
-                counter++
-            } else if(pastPlays[counter] == 'D'){
-                gameView->MH->currentHealth = (gameView->MH->currentHealth)-4;
-                gameView->DC->currentHealth = (gameView->DC->currentHealth)-10;
-                counter++;
-            } else if(pastPlays[counter] == '.'){
-                counter++;
-            } else{
-                printf("INVALID INPUT");
-                abort();
-            }
-        }
-    }else if(pastPlays[counter] == 'D'){
-        counter++; // Advance to Location
-        
-        //Processing Location
-        copyLocation(pastPlays,counter,tempNewLocation);
-        gameView->DC->currentLocation = abbrevToID(tempNewLocation);
-        counter = counter+2; // Advance to Actions
-        
-        //Processing Actions
-        
-        //TOBECOMPLETED
+	if(pastPlays[counter] != 'D'){
+        processHunter (pastPlays,counter,gameView);
+    }else{
+        processDracula(pastPlays,counter,gameView);
     }
 }
 
@@ -285,7 +170,7 @@ void processTurn(char *pastPlays, int counter, GameView gameView){
 int arrayLength (char *pastPlays){
 	int length = 0;
 	while(pastPlays[length] != NULL){
-		length;
+		length++;
 	}
 	return length;
 }
@@ -298,7 +183,7 @@ void copyLocation (char *pastPlays, int counter, char *array){
 }
 
 playerLink playerSelector (PlayerID Player, gameView g){
-    player *temp = malloc(sizeof(struct _player));
+    playerLink *temp = malloc(sizeof(struct _player));
     if(Player == 0){
         temp = gameView->LG;
     }else if(currentPlayer == 1){
@@ -313,3 +198,87 @@ playerLink playerSelector (PlayerID Player, gameView g){
     
     return temp;
 }
+
+void processHunter (char *pastPlays, int counter, GameView gameView){
+    char tempNewLocation [3];
+        
+    //Determining Player to be Processed
+    gameView->currentPlayer = currentTurnSelector(char *pastPlays, int counter)
+    counter++; // Advance to Location
+        
+    //Processing Location
+    copyLocation(pastPlays,counter,tempNewLocation);
+    (playerSelector(gameView->currentPlayer,gameView))->currentLocation = abbrevToID(tempNewLocation);
+    counter = counter+2; // Advance to Actions
+        
+    //Processing Actions
+    while(counter % 8 != 0){
+        if(pastPlays[counter] == 'T'){
+            (playerSelector(gameView->currentPlayer,gameView))->currentHealth = (gameView->LG->currentHealth)-2;
+            counter++;
+        } else if(pastPlays[counter] == 'V'){
+            //VANQUISH IMMATURE VAMPIRE
+            counter++
+        } else if(pastPlays[counter] == 'D'){
+            (playerSelector(gameView->currentPlayer,gameView))->currentHealth = (gameView->LG->currentHealth)-4;
+            (playerSelector(gameView->currentPlayer,gameView))->currentHealth = (gameView->DC->currentHealth)-10;
+            counter++;
+        } else if(pastPlays[counter] == '.'){
+            counter++;
+        } else{
+            printf("INVALID INPUT");
+            abort();
+        }
+    }
+}
+
+void processDracula (char *pastPlays, int counter, GameView gameView){
+    char tempNewLocation [3];
+        
+    //Set currentTurn
+    gameView->currentPlayer = currentTurnSelector(char *pastPlays, int counter)
+    counter++; // Advance to Location
+            
+    //Processing Location
+    copyLocation(pastPlays,counter,tempNewLocation);
+    if(tempNewLocation == 'C?'){
+        gameView->DC->currentLocation = CITY_UNKNOWN
+    }else if (tempNewLocation == 'S?'){
+        gameView->DC->currentLocation = SEA_UNKNOWN
+    }else if (tempNewLocation == 'HI'){
+        //Stays, do nothing;
+    }else if (tempNewLocation == 'TP'){
+        gameView->DC->currentLocation = CASTLE_DRACULA
+    }else if (tempNewLocation[0] == 'D' && tempNewLocation[1] != 'U'){ // Not Dublin
+        processDoubleBack(tempNewLocation,gameView->DC->currentLocation); 
+    }else{
+        gameView->DC->currentLocation = abbrevToID(tempNewLocation);
+    }
+    counter = counter+2; // Advance to Actions
+    
+    //Processing Actions;
+    
+    
+    //TO BE COMPLETED
+}
+
+PlayerID currentTurnSelector(char *pastPlays, int counter){
+    PlayerID player = NULL;
+    if(pastPlays[counter] == 'G'){
+        player = PLAYER_LORD_GODALMING;
+    }else if(pastPlays[counter] == 'S'){
+        player = PLAYER_LORD_GODALMING;
+    }else if(pastPlays[counter] == 'H'){
+        player = PLAYER_LORD_GODALMING;
+    }else if(pastPlays[counter] == 'M'){
+        player = PLAYER_LORD_GODALMING;
+    }else if(pastPlays[counter] == 'D'){
+        player = PLAYER_LORD_GODALMING;
+    }
+    return player;
+}
+
+void static void processDoubleBack(char *arrayLocation, LocationID currentLocation){
+    int turn = arrayLocation[1] - '0';
+    //Read X turn before current turn, assign current location to that X turn location
+} 
