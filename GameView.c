@@ -9,10 +9,8 @@
 
 #define HUNTER_MAX_HEALTH       9
 
-//Pointers Misc
-typedef struct _player *playerLink //Pointer to Player
-
 //Players' Status
+typedef struct _player *playerLink //Pointer to Player
 typedef struct _player {
 	int currentHealth;
 	LocationID currentLocation;
@@ -21,16 +19,16 @@ typedef struct _player {
 }Player;
 
 //Players location storing
-typedef struct _history *Link
-
+typedef struct _history *HistoryLink
 typedef struct _history {
     LocationID location
-    Link next;
+    HistoryLink next;
 }History
-
 typedef struct _list{
-    Link head;
-}List
+    HistoryLink head;
+}HistoryList
+
+
 
 struct gameView {
     PlayerID currentPlayer;
@@ -78,6 +76,7 @@ GameView newGameView(char *pastPlays, PlayerMessage messages[]){
 	gameView->currentScore = GAME_START_SCORE;
 	gameView->currentPlayer = PLAYER_LORD_GODALMING;
 	gameView->LG->currentLocation = gameView->DC->currentLocation = gameView->VH->currentLocation = gameView->MH->currentLocation = gameView->DC->currentLocation = UNKNOWN_LOCATION;
+    
     
 	int playLength = arrayLength (pastPlays);
 	int counter = 0;
@@ -265,7 +264,7 @@ void processHunter (char *pastPlays, int counter, GameView gameView){
 
 void processDracula (char *pastPlays, int counter, GameView gameView){
     char tempNewLocation [3];
-        
+    int turnCounter = counter+6;
     //Set currentTurn
     gameView->currentPlayer = currentTurnSelector(char *pastPlays, int counter)
     counter++; // Advance to Location
@@ -287,8 +286,27 @@ void processDracula (char *pastPlays, int counter, GameView gameView){
     }
     counter = counter+2; // Advance to Actions
     
-    //Processing Actions;
+    //Processing Encounter;
+    while(counter < (turnCounter-3)){
+        if(pastPlays[counter] == 'T' ){
+            //Place Trap at currentLocation
+        }else if(pastPlays[counter] == 'V'){
+            //Place Immature Dracula at currentLocation
+        }
+        counter++;
+    }
     
+    //Processing Action;
+    while(counter < turnCounter){
+        if(pastPlays[counter] == 'M'){
+            //Trap is gone
+        }else if (pastPlays[counter] == 'V'){
+            //Vampire has Matured
+            gameView->currentScore = (gameView->currentScore) - SCORE_LOSS_VAMPIRE_MATURES;
+        }
+        counter++
+    }
+    counter++
     
     //TO BE COMPLETED
     
