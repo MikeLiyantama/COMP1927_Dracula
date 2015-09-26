@@ -10,24 +10,35 @@
 #define HUNTER_MAX_HEALTH       9
 
 //Players' Status
-typedef struct _player *playerLink //Pointer to Player
+typedef struct _player *PlayerLink //Pointer to Player
 typedef struct _player {
 	int currentHealth;
 	LocationID currentLocation;
-    List historyList;
+    HistoryList historyList;
 	//TO BE COMPLETED
 }Player;
 
 //Players location storing
 typedef struct _history *HistoryLink
 typedef struct _history {
-    LocationID location
+    LocationID location;
     HistoryLink next;
-}History
-typedef struct _list{
+}History;
+typedef struct _historyList{
     HistoryLink head;
-}HistoryList
+}HistoryList;
 
+//Trap & Vampire storing
+typedef struct _torv *TorVLink
+typedef struct _torv{
+    LocationID location;
+    int v; //Vampire
+    int t; //Trap
+    TorVLink next;
+}TorV;
+typedef struct _torvList{
+    TorVLink head;
+}TorVList
 
 
 struct gameView {
@@ -39,6 +50,7 @@ struct gameView {
 	Player VH; //Van Helsing
 	Player MH; //Mina Harker
 	Player DC; //Dracula
+    TorVList torvList;
 
 	//TO BE COMPLETED
 };
@@ -60,7 +72,7 @@ static void checkSea(LocationID location, int currentHealth); //Score modifier f
 //Technical functions
 static int arrayLength (char *pastPlays); //Same as strlen in string.h
 static void copyLocation (char *pastPlays, int counter, char *array); // Same as strcpy in string.h
-static playerLink playerSelector (PlayerID currentPlayer, gameView g); // Pointer to Player
+static PlayerLink playerSelector (PlayerID currentPlayer, gameView g); // Pointer to Player
 
 
 // Creates a new GameView to summarise the current state of the game
@@ -176,6 +188,8 @@ LocationID *connectedLocations(GameView currentView, int *numLocations,
     //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
     return NULL;
 }
+
+
 ///////////////////////////
 //Supplementary Functions//
 ///////////////////////////
@@ -203,8 +217,8 @@ void copyLocation (char *pastPlays, int counter, char *array){
     array[tempCounter+2] = NULL;
 }
 
-playerLink playerSelector (PlayerID Player, GameView g){
-    playerLink *temp = malloc(sizeof(struct _player));
+PlayerLink playerSelector (PlayerID Player, GameView g){
+    PlayerLink *temp = malloc(sizeof(struct _player));
     if(Player == 0){
         temp = gameView->LG;
     }else if(currentPlayer == 1){
@@ -226,7 +240,7 @@ void processHunter (char *pastPlays, int counter, GameView gameView){
     int turnCounter = counter+6;    
     //Determining Player to be Processed
     gameView->currentPlayer = currentTurnSelector(char *pastPlays, int counter)
-    playerLink player = (playerSelector(gameView->currentPlayer,gameView)); //Pointer to current Player ADT.
+    PlayerLink player = (playerSelector(gameView->currentPlayer,gameView)); //Pointer to current Player ADT.
     counter++; // Advance to Location
         
     //Processing Location
