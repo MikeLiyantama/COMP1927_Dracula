@@ -129,53 +129,57 @@ int giveMeTheScore(DracView currentView)
 // Get the current health points for a given player
 int howHealthyIs(DracView currentView, PlayerID player)
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    int health = 0;
-    switch (player) {
-    case PLAYER_LORD_GODALMING:
-        health = currentView->LG->currentHealth;
-        break;
-    case PLAYER_DR_SEWARD:
-        health = currentView->DS->currentHealth;
-        break;
-    case PLAYER_VAN_HELSING:
-        health = currentView->VH->currentHealth;
-        break;
-    case PLAYER_MINA_HARKER:
-        health = currentView->MH->currentHealth;
-        break;
-    case PLAYER_DRACULA:
-        health = currentView->DC->currentHealth;
-        break;
-    default:
-        printf("INVALID PLAYER INPUT");
-        abort();
-    }
-    return health;
+    return ((playerSelector(player,currentView))->currentHealth);
 }
 
 // Get the current location id of a given player
 LocationID whereIs(DracView currentView, PlayerID player)
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return 0;
+   return ((playerSelector(player,currentView))->currentLocation);
 }
 
 // Get the most recent move of a given player
 void lastMove(DracView currentView, PlayerID player,
                  LocationID *start, LocationID *end)
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return;
+    PlayerLink p = playerSelector(player,currentView);
+    HistoryLink link = p->historyList->head;
+    HistoryList l = p->historyList
+    int length = historyLength(l);
+    int counter = 1;
+    while((counter+1) < length){
+        link = link->next;
+        counter++;
+    }
+    //Assign start
+    start = link->location;
+    end = link->next->location;
 }
 
 // Find out what minions are placed at the specified location
 void whatsThere(DracView currentView, LocationID where,
                          int *numTraps, int *numVamps)
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    current
-    return;
+    TorVLink link = currentView->torvList->head;
+    if(link == NULL){
+        numTraps = 0;
+        numVamps = 0;
+    }else{
+        while(link->next) != NULL && (link->location) != where){
+            link = link->next;
+        }
+        if(link == NULL){
+            numTraps = 0;
+            numVamps = 0;
+        }else{
+            numTraps = link->t;
+            numVamps = link->v;
+        }
+    }   
+    
+    //Free the vars
+    link = NULL;
+    free(link);
 }
 
 //// Functions that return information about the history of the game
@@ -184,8 +188,42 @@ void whatsThere(DracView currentView, LocationID where,
 void giveMeTheTrail(DracView currentView, PlayerID player,
                             LocationID trail[TRAIL_SIZE])
 {
+    PlayerLink p = playerSelector(player,currentView);
+    HistoryLink link = p->historyList->head;
+    HistoryList l = p->historyList
+    int length = historyLength(l);
+    int counter = 0;
+    if(length <= 6){ //History less than or equal to 6
+        while(link != NULL){
+            trail[counter] = link->location;
+            link = link->next;
+            counter++
+        }
+        while (counter < 6){
+            trail[counter] = UNKNOWN_LOCATION;
+            counter++;
+        }
+    } else { // History more than 6
+        int startPos = (length - 6);
+        int startCounter = 1;
+        while(counter < int startPos){
+            link = link->next;
+            startCounter++;
+        }   
+        while(link != NULL){
+            trail[counter] = link->location;
+            link = link->next;
+            counter++;
+        }
+    }
     
-
+    //Free the vars
+     p = NULL;
+     link = NULL;
+     l = NULL
+     free(p);
+     free(link);
+     free(l);
 }
 
 //// Functions that query the map to find information about connectivity

@@ -74,6 +74,11 @@ static int arrayLength (char *pastPlays); //Same as strlen in string.h
 static void copyLocation (char *pastPlays, int counter, char *array); // Same as strcpy in string.h
 static PlayerLink playerSelector (PlayerID currentPlayer, gameView g); // Pointer to Player
 
+//LinkedList Functions
+static void historyAdd(HistoryList l, LocationID currLocation);
+static int historyLength(HistoryList l);
+static void torvAdd(TorVList l, LocationID currLocation, int vampire, int trap);
+static void torvRemove(TorVList l, LocationID currLocation, int vampire, int trap);
 
 // Creates a new GameView to summarise the current state of the game
 GameView newGameView(char *pastPlays, PlayerMessage messages[]){
@@ -172,9 +177,34 @@ LocationID getLocation(GameView currentView, PlayerID player)
 void getHistory(GameView currentView, PlayerID player,
                             LocationID trail[TRAIL_SIZE])
 {
-    int trailCounter = 0;
-    
-    
+    PlayerLink p = playerSelector(player,currentView);
+    HistoryLink link = p->historyList->head;
+    HistoryList l = p->historyList
+    int length = historyLength(l);
+    int counter = 0;
+    if(length <= 6){ //History less than or equal to 6
+        while(link != NULL){
+            trail[counter] = link->location;
+            link = link->next;
+            counter++
+        }
+        while (counter < 6){
+            trail[counter] = UNKNOWN_LOCATION;
+            counter++;
+        }
+    } else { // History more than 6
+        int startPos = (length - 6);
+        int startCounter = 1;
+        while(counter < int startPos){
+            link = link->next;
+            startCounter++;
+        }   
+        while(link != NULL){
+            trail[counter] = link->location;
+            link = link->next;
+            counter++;
+        }
+    }
 }
 
 //// Functions that query the map to find information about connectivity
@@ -193,21 +223,11 @@ LocationID *connectedLocations(GameView currentView, int *numLocations,
 ///////////////////////////
 //Supplementary Functions//
 ///////////////////////////
-void processTurn(char *pastPlays, int counter, GameView gameView){
-	if(pastPlays[counter] != 'D'){
-        processHunter (pastPlays,counter,gameView);
-    }else{
-        processDracula(pastPlays,counter,gameView);
-    }
-}
-
-
 int arrayLength (char *pastPlays){
 	int length = 0;
 	while(pastPlays[length] != NULL){
 		length++;
-	}
-	return length;
+	} return length;
 }
 
 void copyLocation (char *pastPlays, int counter, char *array){
@@ -230,9 +250,38 @@ PlayerLink playerSelector (PlayerID Player, GameView g){
     }else if(currentPlayer == 4){
         temp = gameView->DC;
     }
-    
     return temp;
 }
+
+PlayerID currentTurnSelector(char *pastPlays, int counter){
+    PlayerID player;
+    if(pastPlays[counter] == 'G'){
+        player = PLAYER_LORD_GODALMING;
+    }else if(pastPlays[counter] == 'S'){
+        player = PLAYER_DR_SEWARD;
+    }else if(pastPlays[counter] == 'H'){
+        player = PLAYER_VAN_HELSING;
+    }else if(pastPlays[counter] == 'M'){
+        player = PLAYER_MINA_HARKER;
+    }else if(pastPlays[counter] == 'D'){
+        player = PLAYER_DRACULA ;
+    }
+    return player;
+}
+
+
+//////////////////
+//MAIN FUNCTIONS//
+//////////////////
+
+void processTurn(char *pastPlays, int counter, GameView gameView){
+	if(pastPlays[counter] != 'D'){
+        processHunter (pastPlays,counter,gameView);
+    }else{
+        processDracula(pastPlays,counter,gameView);
+    }
+}
+
 
 void processHunter (char *pastPlays, int counter, GameView gameView){
     char tempNewLocation [3];
@@ -328,33 +377,19 @@ void processDracula (char *pastPlays, int counter, GameView gameView){
     gameView->currentScore = (gameView->currentScore)-SCORE_LOSS_DRACULA_TURN; 
 }
 
-PlayerID currentTurnSelector(char *pastPlays, int counter){
-    PlayerID player;
-    if(pastPlays[counter] == 'G'){
-        player = PLAYER_LORD_GODALMING;
-    }else if(pastPlays[counter] == 'S'){
-        player = PLAYER_DR_SEWARD;
-    }else if(pastPlays[counter] == 'H'){
-        player = PLAYER_VAN_HELSING;
-    }else if(pastPlays[counter] == 'M'){
-        player = PLAYER_MINA_HARKER;
-    }else if(pastPlays[counter] == 'D'){
-        player = PLAYER_DRACULA ;
-    }
-    return player;
-}
+/////////////////////////////
+//HUNTER SPECIFIC FUNCTIONS//
+/////////////////////////////
 
 void hunterRest(int currentHealth, int bool){
     if(bool == TRUE){
         currentHealth = currentHealth + LIFE_GAIN_REST;
-        maxHealth(currentHealth)
+        maxHealth(currentHealth);
     }
 }
 
 void maxHealth(int currentHealth){
-    if(currentHealth > 9){
-        currentHealth = HUNTER_MAX_HEALTH;
-    }
+    if(currentHealth > 9)currentHealth = HUNTER_MAX_HEALTH;
 }
 
 void hunterHospital(int currentHealth, LocationID currentLocation){ //Teleport to Hospital if Hunter's health below 0
@@ -363,16 +398,24 @@ void hunterHospital(int currentHealth, LocationID currentLocation){ //Teleport t
         currentHealth = 0;
     }
 }
-
-void processDoubleBack(char *arrayLocation, LocationID currentLocation){
-    int turn = arrayLocation[1] - '0';
-    //Read X turn before current turn, assign current location to that X turn location
+//////////////////////////////
+//DRACULA SPECIFIC FUNCTIONS//
+//////////////////////////////
+void processDoubleBack(char *arrayLocation, HistoryList l, int nBack, LocationID currlocation){
+    int length = (historyLength(l) - nBack);
+    int counter = 1;
+    HistoryLink link = l->head;
+    while(counter < length){
+        link = link->next;
+        counter++;
+    }
+    currLocation = link->location;
+    link = NULL;
+    free(link);
 } 
 
 void draculaEncounter(LocationID dracula, LocationID hunter1, LocationID hunter2 ,LocationID hunter3 ,LocationID hunter4, int currentHealth){
-    if(dracula == hunter1 || dracula == hunter2 || dracula == hunter3 || dracula == hunter4){
-        currentHealth = currentHealth - LIFE_LOSS_HUNTER_ENCOUNTER;
-    }
+    if(dracula == hunter1 || dracula == hunter2 || dracula == hunter3 || dracula == hunter4)currentHealth = currentHealth - LIFE_LOSS_HUNTER_ENCOUNTER;
 }
 
 void checkSea(LocationID location, int currentHealth){
@@ -380,7 +423,87 @@ void checkSea(LocationID location, int currentHealth){
 }
 
 void draculaCastle(LocationID location, int currentHealth){
-    if(location == CASTLE_DRACULA){
-        currentHealth = currentHealth + LIFE_GAIN_CASTLE_DRACULA;
+    if(location == CASTLE_DRACULA)currentHealth = currentHealth + LIFE_GAIN_CASTLE_DRACULA;
+}
+
+////////////////////////////////
+//HISTORY LINKEDLIST FUNCTIONS//
+////////////////////////////////
+
+void historyAdd(HistoryList l, LocationID currLocation){
+    HistoryLink link = l;
+    History newHistory == malloc(sizeof(History));
+    newHistory->location = currLocation;
+    newHistory->next = NULL;
+    
+    link = l->head;
+    if(link == NULL){
+        l->head = newHistory;
+        free(link);
+    } else {
+        while(link->next != NULL){
+            link = link->next;
+        }
+        link->next = newHistory;
     }
 }
+
+int historyLength(HistoryList l){
+    int length = 0;
+    HistoryLink link = l->head;
+    while(link != NULL){
+        length++
+        link = link->next;
+    }
+    return length;
+}
+
+////////////////////////////
+//Trap & Vampire Functions//
+////////////////////////////
+
+void torvAdd(TorVList l, LocationID currLocation, int vampire, int trap){
+    TorVLink link = l->head;
+    if(link == NULL){ //When list is empty
+        TorV newTorV == malloc(sizeof(History));
+        newTorV->location = currLocation;
+        newTorV->v = vampire;
+        newTorV->t = trap;
+        newTorV->next = NULL;
+        link = newTorV;
+    }else{
+        while(link->next) != NULL && (link->location) != currLocation){
+            link = link->next;
+        }   
+        if(link->location == currentLocation){ //Existing data found
+            link->v = (link->v) + vampire;
+            link->t = (link->t) + trap;
+        }else{ //Create new Entry
+            TorV newTorV == malloc(sizeof(History));
+            newTorV->location = currLocation;
+            newTorV->v = vampire;
+            newTorV->t = trap;
+            newTorV->next = NULL;
+            link->next = newTorV;
+        }
+    }
+}
+
+void torvRemove(TorVList l, LocationID currLocation, int vampire, int trap){
+    TorVLink link = l->head;
+    while(link->next) != NULL && (link->location) != currLocation){
+            link = link->next;
+    }
+    link->v = (link->v) - vampire;
+    link->t = (link->t) - trap;
+    
+    //Delete Entry if Trap & Vampire = 0
+    if(link->v == 0 && link->t == 0){
+        TorVLink tempLink = l->head;
+        while(tempLink->next != link){
+            tempLink->tempLink->next;
+        }
+        tempLink->next = link->next;
+        free(link);
+    }  
+} 
