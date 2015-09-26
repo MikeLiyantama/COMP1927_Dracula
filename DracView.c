@@ -253,7 +253,7 @@ Player playerstat(Player player, int health, LocationID location){
 
 void processTurn(char *pastPlays, int counter, GameView gameView){
     if(pastPlays[counter] != 'D'){
-        processHunter (pastPlays,counter,gameView);
+        processHunter(pastPlays,counter,gameView);
     }else{
         processDracula(pastPlays,counter,gameView);
     }

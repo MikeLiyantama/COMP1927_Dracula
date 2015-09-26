@@ -286,11 +286,18 @@ void processTurn(char *pastPlays, int counter, GameView gameView){
 void processHunter (char *pastPlays, int counter, GameView gameView){
     char tempNewLocation [3];
     int rest = FALSE;
-    int turnCounter = counter+6;    
+    int turnCounter = counter+6;
+        
     //Determining Player to be Processed
     gameView->currentPlayer = currentTurnSelector(char *pastPlays, int counter)
     PlayerLink player = (playerSelector(gameView->currentPlayer,gameView)); //Pointer to current Player ADT.
     counter++; // Advance to Location
+    
+    //Hospital Check
+    int hospitalTemp = player->currentLocation;
+    if(player->currentLocation == ST_JOSEPH_AND_ST_MARYS){
+        player->currentHealth = GAME_START_HUNTER_LIFE_POINTS;
+    }
         
     //Processing Location
     copyLocation(pastPlays,counter,tempNewLocation);
@@ -304,14 +311,16 @@ void processHunter (char *pastPlays, int counter, GameView gameView){
     while(counter < turnCounter){
         if(pastPlays[counter] == 'T'){
             player->currentHealth = (player->currentHealth)-2;
-            void hunterHospital(int currentHealth, LocationID currentLocation);
+            torvRemove(gameView->torvList,player->currentLocation, 0, 1);
+            hunterHospital(player->currentHealth,player->currentLocation);
             counter++;
         } else if(pastPlays[counter] == 'V'){
-            //VANQUISH IMMATURE VAMPIRE
+            torvRemove(gameView->torvList,player->currentLocation, 1, 0);
             counter++
         } else if(pastPlays[counter] == 'D'){
             player->currentHealth = (player->currentHealth)-LIFE_LOSS_DRACULA_ENCOUNTER;
             gameView->DC->currentHealth = (gameView->DC->currentHealth)-LIFE_LOSS_HUNTER_ENCOUNTER ;
+            hunterHospital(player->currentHealth,player->currentLocation);
             counter++;
         } else if(pastPlays[counter] == '.'){
             counter++;
@@ -329,19 +338,32 @@ void processDracula (char *pastPlays, int counter, GameView gameView){
     //Set currentTurn
     gameView->currentPlayer = currentTurnSelector(char *pastPlays, int counter)
     counter++; // Advance to Location
+    
+    LocationID shadowLocation = NULL;
             
     //Processing Location
     copyLocation(pastPlays,counter,tempNewLocation);
     if(tempNewLocation == 'C?'){
-        gameView->DC->currentLocation = CITY_UNKNOWN
+        gameView->DC->currentLocation = CITY_UNKNOWN;
     }else if (tempNewLocation == 'S?'){
-        gameView->DC->currentLocation = SEA_UNKNOWN
+        gameView->DC->currentLocation = SEA_UNKNOWN;
     }else if (tempNewLocation == 'HI'){
-        //Stays, do nothing;
+        gameView->DC->currentLocation = HIDE;
     }else if (tempNewLocation == 'TP'){
-        gameView->DC->currentLocation = CASTLE_DRACULA
+        gameView->DC->currentLocation = CASTLE_DRACULA;
     }else if (tempNewLocation[0] == 'D' && tempNewLocation[1] != 'U'){ // Not Dublin
-        processDoubleBack(tempNewLocation,gameView->DC->currentLocation); 
+        processDoubleBack(tempNewLocation, shadowLocation);
+        if(tempNewLocation[1] == 1){
+            gameView->DC->currentLocation = DOUBLE_BACK_1;
+        } else if(tempNewLocation[1] == 2){
+            gameView->DC->currentLocation = DOUBLE_BACK_2;
+        } else if(tempNewLocation[1] == 3){
+            gameView->DC->currentLocation = DOUBLE_BACK_3;
+        } else if(tempNewLocation[1] == 4){
+            gameView->DC->currentLocation = DOUBLE_BACK_4;
+        } else if(tempNewLocation[1] == 5){
+            gameView->DC->currentLocation = DOUBLE_BACK_5;
+        } 
     }else{
         gameView->DC->currentLocation = abbrevToID(tempNewLocation);
     }
@@ -350,9 +372,9 @@ void processDracula (char *pastPlays, int counter, GameView gameView){
     //Processing Encounter;
     while(counter < (turnCounter-3)){
         if(pastPlays[counter] == 'T' ){
-            //Place Trap at currentLocation
+            torvAdd(gameView->torvList, gameView->DC->currentLocation, 0, 1);
         }else if(pastPlays[counter] == 'V'){
-            //Place Immature Dracula at currentLocation
+            torvAdd(gameView->torvList, gameView->DC->currentLocation, 1, 0);
         }
         counter++;
     }
@@ -370,10 +392,9 @@ void processDracula (char *pastPlays, int counter, GameView gameView){
     counter++
     
     //Score modifiers
-    draculaEncounter(gameView->DC->currentLocation, gameView->LG->currentLocation, gameView->DS->currentLocation, gameView->VH->currentLocation,gameView->MH->currentLocation,gameView->currentScore);
+    //draculaEncounter(gameView->DC->currentLocation, gameView->LG->currentLocation, gameView->DS->currentLocation, gameView->VH->currentLocation,gameView->MH->currentLocation,gameView->currentScore);
     checkSea(gameView->DC->currentLocation, gameView->DC->currentHealth);
     draculaCastle(gameView->DC->currentLocation, gameView->DC->currentHealth);
-    
     gameView->currentScore = (gameView->currentScore)-SCORE_LOSS_DRACULA_TURN; 
 }
 
@@ -414,10 +435,6 @@ void processDoubleBack(char *arrayLocation, HistoryList l, int nBack, LocationID
     free(link);
 } 
 
-void draculaEncounter(LocationID dracula, LocationID hunter1, LocationID hunter2 ,LocationID hunter3 ,LocationID hunter4, int currentHealth){
-    if(dracula == hunter1 || dracula == hunter2 || dracula == hunter3 || dracula == hunter4)currentHealth = currentHealth - LIFE_LOSS_HUNTER_ENCOUNTER;
-}
-
 void checkSea(LocationID location, int currentHealth){
     if( idToType(location) == 'SEA')currentHealth = currentHealth - LIFE_LOSS_SEA; 
 }
@@ -425,6 +442,11 @@ void checkSea(LocationID location, int currentHealth){
 void draculaCastle(LocationID location, int currentHealth){
     if(location == CASTLE_DRACULA)currentHealth = currentHealth + LIFE_GAIN_CASTLE_DRACULA;
 }
+/*
+void draculaEncounter(LocationID dracula, LocationID hunter1, LocationID hunter2 ,LocationID hunter3 ,LocationID hunter4, int currentHealth){
+    if(dracula == hunter1 || dracula == hunter2 || dracula == hunter3 || dracula == hunter4)currentHealth = currentHealth - LIFE_LOSS_HUNTER_ENCOUNTER;
+}
+*/
 
 ////////////////////////////////
 //HISTORY LINKEDLIST FUNCTIONS//
