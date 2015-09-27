@@ -8,18 +8,39 @@
 #include "HunterView.h"
 // #include "Map.h" ... if you decide to use the Map ADT
      
-//Pointers Misc
-typedef struct _player *playerLink //Pointer to Player
-     
 //Players' Status
+typedef struct _player *PlayerLink //Pointer to Player
 typedef struct _player {
 	int currentHealth;
 	LocationID currentLocation;
-
+    HistoryList historyList;
 	//TO BE COMPLETED
-}Player;     
-     
-struct hunterView {
+}Player;
+
+//Players location storing
+typedef struct _history *HistoryLink
+typedef struct _history {
+    LocationID location;
+    HistoryLink next;
+}History;
+typedef struct _historyList{
+    HistoryLink head;
+}HistoryList;
+
+//Trap & Vampire storing
+typedef struct _torv *TorVLink
+typedef struct _torv{
+    LocationID location;
+    int v; //Vampire
+    int t; //Trap
+    TorVLink next;
+}TorV;
+typedef struct _torvList{
+    TorVLink head;
+}TorVList
+
+
+struct gameView {
     PlayerID currentPlayer;
     Round currentRound;
 	int currentScore;
@@ -28,20 +49,35 @@ struct hunterView {
 	Player VH; //Van Helsing
 	Player MH; //Mina Harker
 	Player DC; //Dracula
+    TorVList torvList;
+
+	//TO BE COMPLETED
 };
-     
+
 //Supplementary functions
 static void processTurn(char *pastPlays, int counter, GameView gameView); // Processes each turn for each player (process each 7 chars)
 static void processHunter (char *pastPlays, int counter, GameView gameView); // Process Hunter Type Turn
 static void processDracula (char *pastPlays, int counter, GameView gameView); // Process Dracula Type Turn
 
+//Hunter specific functions
+static void hunterRest(int currentHealth, int bool); //Score modifier for resting
+static void maxHealth(int currentHealth); //Limit maximum health of Hunter
+
 //Dracula Specific Functions
-static void processDoubleBack(char *arrayLocation, LocationID currentLocation); 
+static void processDoubleBack(char *arrayLocation, LocationID currentLocation); //Processing doubleback turn
+static void draculaEncounter(LocationID dracula, LocationID hunter1, LocationID hunter2 ,LocationID hunter3 ,LocationID hunter4, int currentHealth); //Score Modifier for hunter encounter
+static void checkSea(LocationID location, int currentHealth); //Score modifier for SEA move
 
 //Technical functions
-static int arrayLength (char *pastPlays);
-static void copyLocation (char *pastPlays, int counter, char *array)
-static playerLink playerSelector (PlayerID currentPlayer, gameView g);
+static int arrayLength (char *pastPlays); //Same as strlen in string.h
+static void copyLocation (char *pastPlays, int counter, char *array); // Same as strcpy in string.h
+static PlayerLink playerSelector (PlayerID currentPlayer, gameView g); // Pointer to Player
+
+//LinkedList Functions
+static void historyAdd(HistoryList l, LocationID currLocation);
+static int historyLength(HistoryList l);
+static void torvAdd(TorVList l, LocationID currLocation, int vampire, int trap);
+static void torvRemove(TorVList l, LocationID currLocation, int vampire, int trap);
 
 // Creates a new HunterView to summarise the current state of the game
 HunterView newHunterView(char *pastPlays, PlayerMessage messages[])

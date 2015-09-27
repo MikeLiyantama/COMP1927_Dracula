@@ -7,8 +7,6 @@
 #include "GameView.h"
 // #include "Map.h" ... if you decide to use the Map ADT
 
-#define HUNTER_MAX_HEALTH       9
-
 //Players' Status
 typedef struct _player *PlayerLink //Pointer to Player
 typedef struct _player {
