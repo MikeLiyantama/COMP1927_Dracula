@@ -6,19 +6,18 @@
 #include "Game.h"
 #include "GameView.h"
 #include "HunterView.h"
-// #include "Map.h" ... if you decide to use the Map ADT
+#include "Map.h" //... if you decide to use the Map ADT
      
 //Players' Status
-typedef struct _player *PlayerLink //Pointer to Player
+typedef struct _player *PlayerLink; //Pointer to Player
 typedef struct _player {
 	int currentHealth;
 	LocationID currentLocation;
     HistoryList historyList;
-	//TO BE COMPLETED
 }Player;
 
 //Players location storing
-typedef struct _history *HistoryLink
+typedef struct _history *HistoryLink;
 typedef struct _history {
     LocationID location;
     HistoryLink next;
@@ -28,7 +27,7 @@ typedef struct _historyList{
 }HistoryList;
 
 //Trap & Vampire storing
-typedef struct _torv *TorVLink
+typedef struct _torv *TorVLink;
 typedef struct _torv{
     LocationID location;
     int v; //Vampire
@@ -37,8 +36,17 @@ typedef struct _torv{
 }TorV;
 typedef struct _torvList{
     TorVLink head;
-}TorVList
+}TorVList;
 
+//LinkedList for map functions
+typedef struct _location *LocationLink;
+typedef struct _location{
+    LocationID location;
+    LocationLink next;
+}LocationRep;
+typedef struct _locationList{
+    LocationLink head;
+}LocationList;
 
 struct gameView {
     PlayerID currentPlayer;
@@ -50,8 +58,6 @@ struct gameView {
 	Player MH; //Mina Harker
 	Player DC; //Dracula
     TorVList torvList;
-
-	//TO BE COMPLETED
 };
 
 //Supplementary functions
@@ -78,6 +84,11 @@ static void historyAdd(HistoryList l, LocationID currLocation);
 static int historyLength(HistoryList l);
 static void torvAdd(TorVList l, LocationID currLocation, int vampire, int trap);
 static void torvRemove(TorVList l, LocationID currLocation, int vampire, int trap);
+
+//Linkedlist Map Location
+static LocationList newLocation();
+void addLocation(LocationList l, LocationID new);
+int countLocation(LocationList l);
 
 // Creates a new HunterView to summarise the current state of the game
 HunterView newHunterView(char *pastPlays, PlayerMessage messages[])
@@ -181,13 +192,18 @@ void giveMeTheTrail(HunterView currentView, PlayerID player,
     int counter = 0;
     if(length <= 6){ //History less than or equal to 6
         while(link != NULL){
-            trail[counter] = link->location;
-            link = link->next;
-            counter++
-        }
-        while (counter < 6){
-            trail[counter] = UNKNOWN_LOCATION;
-            counter++;
+            int unknownPlaceCounter = TRAIL_SIZE - length;
+            while(unknownPlaceCounter > 0)
+                trail[counter] = UNKNOWN_LOCATION;
+                link = link->next;
+                counter--;
+                unknownPlaceCounter--;
+            }
+            while(counter > 0){
+                trail[counter] = link->location;
+                link = link->next;
+                counter--;
+            }
         }
     } else { // History more than 6
         int startPos = (length - 6);
@@ -207,18 +223,105 @@ void giveMeTheTrail(HunterView currentView, PlayerID player,
 //// Functions that query the map to find information about connectivity
 
 // What are my possible next moves (locations)
-LocationID *whereCanIgo(HunterView currentView, int *numLocations, int road, int sea)
+LocationID *whereCanIgo(HunterView currentView, int *numLocations,
+                        int road, int rail, int sea)
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return NULL;
+    Map map = newmap();
+    TransportID transport;
+    LocationList tempLoc = newLocation();
+    if(road == 1) {
+        transport = ROAD;
+    } else if(rail == 1){
+        transport = RAIL;
+    } else if(boat == 1) {
+        transport = BOAT;
+    }
+    
+    //Scanning transport
+    VList temp = map->connections[from];
+    while(temp != NULL){
+        if(temp->type == transport){
+            if(transport == RAIL){
+                if(round % 4 == 0){
+                    temp = temp->next;
+                }
+            }else{
+                addLocation(tempLoc, temp->v);
+                temp = temp->next;
+            }
+        }else{
+            temp = temp->next;
+        }
+    }
+    
+    destroyMap(map);
+    
+    //Counting nodes
+    int counter = countLocation(tempLoc);
+    
+    //Place connected ID to array
+    LocationID connectedPlaces[(counter-1)];
+    int tempCounter = 0;
+    LocationLink tempLink = tempLoc->head;
+    while(tempLink !=NULL){
+        connectedPlaces[tempCounter] = tempLink->location;
+        tempLink = tempLink->next;
+        tempCounter++;
+    }
+    
+    return *connectedPlaces;
 }
 
 // What are the specified player's next possible moves
 LocationID *whereCanTheyGo(HunterView currentView, int *numLocations,
                            PlayerID player, int road, int rail, int sea)
 {
-    //REPLACE THIS WITH YOUR OWN IMPLEMENTATION
-    return NULL;
+    Map map = newmap();
+    TransportID transport;
+    LocationList tempLoc = newLocation();
+    if(road == 1) {
+        transport = ROAD;
+    } else if(rail == 1){
+        transport = RAIL;
+    } else if(boat == 1) {
+        transport = BOAT;
+    }
+    
+    //Scanning transport
+    VList temp = map->connections[from];
+    while(temp != NULL){
+        if(temp->type == transport){
+            if(player == PLAYER_DRACULA && (transport == RAIL || temp->v == ST_JOSEPH_AND_ST_MARYS)){
+                temp = temp->next;
+            } else if((player == PLAYER_DR_SEWARD || player == PLAYER_LORD_GODALMING || player == PLAYER_MINA_HARKER || player == PLAYER_VAN_HELSING) && transport == RAIL){
+                if(round % 4 == 0){
+                    temp = temp->next;
+                }
+            }else{
+                addLocation(tempLoc, temp->v);
+                temp = temp->next;
+            }
+        }else{
+            temp = temp->next;
+        }
+    }
+    
+    destroyMap(map);
+    
+    //Counting nodes
+    int counter = countLocation(tempLoc);
+    
+    //Place connected ID to array
+    LocationID connectedPlaces[(counter-1)];
+    int tempCounter = 0;
+    LocationLink tempLink = tempLoc->head;
+    while(tempLink !=NULL){
+        connectedPlaces[tempCounter] = tempLink->location;
+        tempLink = tempLink->next;
+        tempCounter++;
+    }
+    
+    return *connectedPlaces;
 }
 
 ///////////////////////////
@@ -302,7 +405,7 @@ void processHunter (char *pastPlays, int counter, GameView gameView){
     counter = counter+2; // Advance to Actions
         
     //Processing Actions
-    while(counter < turnCounter){
+    while(counter <= turnCounter){
         if(pastPlays[counter] == 'T'){
             player->currentHealth = (player->currentHealth)-2;
             void hunterHospital(int currentHealth, LocationID currentLocation);
@@ -349,7 +452,7 @@ void processDracula (char *pastPlays, int counter, GameView gameView){
     counter = counter+2; // Advance to Actions
     
     //Processing Encounter;
-    while(counter < (turnCounter-3)){
+    while(counter < (turnCounter-2)){
         if(pastPlays[counter] == 'T' ){
             //Place Trap at currentLocation
         }else if(pastPlays[counter] == 'V'){
@@ -359,7 +462,7 @@ void processDracula (char *pastPlays, int counter, GameView gameView){
     }
     
     //Processing Action;
-    while(counter < turnCounter){
+    while(counter <= turnCounter){
         if(pastPlays[counter] == 'M'){
             //Trap is gone
         }else if (pastPlays[counter] == 'V'){
@@ -368,7 +471,6 @@ void processDracula (char *pastPlays, int counter, GameView gameView){
         }
         counter++
     }
-    counter++
     
     //Score modifiers
     draculaEncounter(gameView->DC->currentLocation, gameView->LG->currentLocation, gameView->DS->currentLocation, gameView->VH->currentLocation,gameView->MH->currentLocation,gameView->currentScore);
@@ -508,3 +610,42 @@ void torvRemove(TorVList l, LocationID currLocation, int vampire, int trap){
         free(link);
     }  
 } 
+
+////////////////////////////
+//Map LinkedList Functions//
+////////////////////////////
+LocationList newLocation(){
+    LocationList new = malloc(sizeof(LocationList));
+    new->head = NULL;
+    return new;
+}
+
+void addLocation(LocationList l, LocationID new){
+    LocationLink temp = l->head;
+    if(temp == NULL){
+        LocationRep newLocation = malloc(sizeof(LocationRep));
+        newLocation->location = new;
+        newLocation->next = NULL;
+        temp = newLocation;
+    }
+    else{
+        while(temp->next != NULL){
+            temp = temp->next;
+        }
+        LocationRep newLocation = malloc(sizeof(LocationRep));
+        newLocation->location = new;
+        newLocation->next = NULL;
+        temp->next = newLocation;
+    }
+}
+
+int countLocation(LocationList l){
+    LocationLink temp = l->head;
+    int counter = 0;
+    while(l != NULL){
+        counter++;
+        temp = temp->next;
+    }
+    
+    return counter;
+}
