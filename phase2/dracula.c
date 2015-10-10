@@ -6,6 +6,9 @@
 #include "Game.h"
 #include "DracView.h"
 
+char *idToAbbrev(LocationID p);
+void LocationCopy (char *from, char *to);
+
 void decideDraculaMove(DracView gameState)
 {
 	if(giveMeTheRound(gameState) == 1){
@@ -28,4 +31,18 @@ void decideDraculaMove(DracView gameState)
 		free(dest);
         return;
 	}
+}
+
+void LocationCopy (char *from, char *to){
+    int tempCounter = 0;
+    to[0] = from[0];
+    to[1] = from[1];
+    to[2] = '\0';
+    free(tempCounter);
+}
+
+char *idToAbbrev(LocationID p)
+{
+   assert(validPlace(p));
+   return places[p].abbrev;
 }

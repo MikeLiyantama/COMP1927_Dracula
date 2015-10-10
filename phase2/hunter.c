@@ -6,6 +6,9 @@
 #include "Game.h"
 #include "HunterView.h"
 
+char *idToAbbrev(LocationID p);
+void LocationCopy (char *from, char *to);
+
 void decideHunterMove(HunterView gameState)
 {
     if(giveMeTheRound(gameState) == 1){
