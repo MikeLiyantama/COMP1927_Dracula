@@ -18,6 +18,8 @@ void decideHunterMove(HunterView gameState)
         
         //Subsequent Round
         char dest[3]; //Destination var
+        int dracReach = FALSE;
+        int size, *reachableLocation;
         
         //Rest if health <5
         if(howHealthIs(gameState,whoAmI(gameState)) < 5){
@@ -31,8 +33,6 @@ void decideHunterMove(HunterView gameState)
         LocationID dracLocation = whereIs(gameState,PLAYER_DRACULA);
         
         //Check dracula Reach by Road
-        int dracReach = FALSE;
-        int size, *reachableLocation;
         reachableLocation = whereCanIgo(gameState,&size,1,0,0);
         for(i = 0; i < size && dracReach = FALSE; i++){
             if(edges[i] == dracLocation){
@@ -46,8 +46,6 @@ void decideHunterMove(HunterView gameState)
         free(reachableLocation);
         
         //Check dracula Reach by Rail
-        int dracReach = FALSE;
-        int size, *reachableLocation;
         reachableLocation = whereCanIgo(gameState,&size,0,1,0);
         for(i = 0; i < size && dracReach = FALSE; i++){
             if(edges[i] == dracLocation){
@@ -61,8 +59,6 @@ void decideHunterMove(HunterView gameState)
         free(reachableLocation);
         
         //Check dracula Reach by Sea
-        int dracReach = FALSE;
-        int size, *reachableLocation;
         reachableLocation = whereCanIgo(gameState,&size,0,0,1);
         for(i = 0; i < size && dracReach = FALSE; i++){
             if(edges[i] == dracLocation){
@@ -75,8 +71,14 @@ void decideHunterMove(HunterView gameState)
         free(size);
         free(reachableLocation);
         
+        //If round is multiple of 8, rest
+        if(giveMeTheRound(gameState) % 8 == 0){
+            LocationCopy(whereIs(gameState,whoAmI(gameState)), dest);
+            registerBestPlay(dest,"Tired..");
+            return;
+        }
+        
         //Go to random places (dracula cannot be found)
-        int size , *reachableLocation;
         int magicNum = giveMeTheRound(gameState);
         reachableLocation = whereCanIgo(gameState,&size,1,0,0);
         while(magicNum > size){
@@ -93,7 +95,6 @@ void LocationCopy (char *from, char *to){
     to[0] = from[0];
     to[1] = from[1];
     to[2] = '\0';
-    free(tempCounter);
 }
 
 char *idToAbbrev(LocationID p)
